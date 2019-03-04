@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Data;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
@@ -36,13 +37,26 @@ class StationController extends Controller
         return response()->json(compact('token'));
     }
 
-    public function sendData() {
+    public function test() {
+        $station = Station::find(2);
+
+        $token = JWTAuth::fromUser($station);
+
+
+        return $token;
+    }
+
+    public function sendData(Request $request) {
 
         try {
             if (! $station = JWTAuth::parseToken()->authenticate()) {
                 return response()->json(['Stacja nie została znaleziona!'], 404);
             }
 
+            $data = new Data();
+            $data->station_id = $station->id;
+            $data->temperature = $request->temperature;
+            $data->pressure = $request->pressure;
         } catch (Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
 
             return response()->json(['Token się przedawnił!'], $e->getStatusCode());
@@ -57,7 +71,7 @@ class StationController extends Controller
 
         }
 
-        return response()->json(compact('station'));
+        return response()->json($data->save());
     }
 
 }
