@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Data;
+use App\Services\DataService;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
@@ -13,13 +14,17 @@ use App\Models\Station;
 
 class StationController extends Controller
 {
-    public function __construct()
+    private $dataService;
+
+    public function __construct(DataService $dataService)
     {
         Config::set('jwt.user', Station::class);
         Config::set('auth.providers', ['users' => [
             'driver' => 'eloquent',
             'model' => Station::class,
         ]]);
+
+        $this->dataService = $dataService;
     }
 
     public function authenticate(Request $request)
@@ -53,10 +58,6 @@ class StationController extends Controller
                 return response()->json(['Stacja nie została znaleziona!'], 404);
             }
 
-            $data = new Data();
-            $data->station_id = $station->id;
-            $data->temperature = $request->temperature;
-            $data->pressure = $request->pressure;
         } catch (Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
 
             return response()->json(['Token się przedawnił!'], $e->getStatusCode());
@@ -71,7 +72,7 @@ class StationController extends Controller
 
         }
 
-        return response()->json($data->save());
+        return response()->json($this->dataService->makeData($request, $station->id));
     }
 
 }
