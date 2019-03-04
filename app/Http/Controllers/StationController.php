@@ -72,7 +72,7 @@ class StationController extends Controller
 
         }
 
-        return response()->json($this->dataService->makeData($request, $station->id));
+        return response()->json([$this->dataService->makeData($request, $station->id)], 200);
     }
 
 }
