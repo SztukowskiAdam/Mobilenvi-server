@@ -35,21 +35,12 @@ class StationController extends Controller
 
         return response()->json(compact('token'));
     }
-    public function test() {
-        $station = Station::find(2);
-
-        $token = JWTAuth::fromUser($station);
-
-
-        return $token;
-    }
 
     public function sendData() {
 
         try {
-
             if (! $station = JWTAuth::parseToken()->authenticate()) {
-                return response()->json(['Użytkownik nie został znaleziony'], 404);
+                return response()->json(['Stacja nie została znaleziona!'], 404);
             }
 
         } catch (Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
