@@ -19,6 +19,9 @@ Route::group(['middleware' => ['CORS']], function () {
     Route::post('login', 'UserController@authenticate');
     Route::get('open', 'DataController@open');
 
+    Route::get('station/login', 'StationController@test');
+    Route::post('station/send', 'StationController@sendData');
+
     Route::group(['middleware' => ['jwt.verify']], function() {
         Route::get('user', 'UserController@getAuthenticatedUser');
         Route::get('closed', 'DataController@closed');
