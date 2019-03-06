@@ -51,6 +51,12 @@ class StationController extends Controller
         return $token;
     }
 
+    public function getListOfStations() {
+        $stations = Station::select('id')->pluck('id')->toArray();
+
+        return response()->json(compact('stations'));
+    }
+
     public function sendData(Request $request) {
 
         try {
@@ -74,5 +80,4 @@ class StationController extends Controller
 
         return response()->json([$this->dataService->makeData($request, $station->id)], 200);
     }
-
 }

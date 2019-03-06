@@ -83,4 +83,33 @@ class UserController extends Controller
 
         return response()->json(compact('user'));
     }
+
+    public function userLocationData(Request $request) {
+        try {
+            if (! $user = JWTAuth::parseToken()->authenticate()) {
+                return response()->json(['Użytkownik nie został znaleziony'], 404);
+            }
+
+        } catch (Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
+
+            return response()->json(['Token się przedawnił!'], $e->getStatusCode());
+
+        } catch (Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+
+            return response()->json(['Token jest niewłaśniwy!'], $e->getStatusCode());
+
+        } catch (Tymon\JWTAuth\Exceptions\JWTException $e) {
+
+            return response()->json(['Token nie istnieje!'], $e->getStatusCode());
+
+        }
+
+        $station = Station::orderByRaw('ABS(position_x - '.$request->x.') + ABS(position_y - '.$request->y.')')->first();
+
+        if(empty($station)) return false;
+
+        $data = Data::where('station_id', $station->id)->orderBy('created_at')->first();
+
+        return response()->json(compact('data'),201);
+    }
 }

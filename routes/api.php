@@ -21,9 +21,11 @@ Route::group(['middleware' => ['CORS']], function () {
 
     Route::post('station/login', 'StationController@authenticate');
     Route::post('station/send', 'StationController@sendData');
+    Route::get('station/list', 'StationController@getListOfStations');
 
     Route::group(['middleware' => ['jwt.verify']], function() {
         Route::get('user', 'UserController@getAuthenticatedUser');
+        Route::post('user/weather', 'UserController@userLocationData');
         Route::get('closed', 'DataController@closed');
     });
 });
