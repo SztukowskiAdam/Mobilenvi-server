@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Data;
+use App\Models\Station;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
@@ -69,6 +71,7 @@ class UserController extends Controller
 
         } catch (Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
 
+            $newToken = JWTAuth::refresh(JWTAuth::getToken());
             return response()->json(['Token się przedawnił!'], $e->getStatusCode());
 
         } catch (Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
@@ -108,7 +111,7 @@ class UserController extends Controller
 
         if(empty($station)) return false;
 
-        $data = Data::where('station_id', $station->id)->orderBy('created_at')->first();
+        $data = Data::where('station_id', $station->id)->orderBy('created_at', 'DESC')->first();
 
         return response()->json(compact('data'),201);
     }
