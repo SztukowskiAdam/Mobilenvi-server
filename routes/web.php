@@ -15,4 +15,4 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('test', 'StationController@userLocationData');
+Route::get('test', 'StationController@getCurrentData');

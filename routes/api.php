@@ -19,6 +19,7 @@ Route::group(['middleware' => ['CORS']], function () {
     Route::post('login', 'UserController@authenticate');
     Route::get('open', 'DataController@open');
     Route::post('user/weather', 'UserController@userLocationData');
+    Route::get('data', 'StationController@getCurrentData');
 
     Route::post('station/login', 'StationController@authenticate');
     Route::post('station/send', 'StationController@sendData');

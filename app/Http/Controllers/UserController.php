@@ -111,7 +111,7 @@ class UserController extends Controller
 
         if(empty($station)) return false;
 
-        $data = Data::where('station_id', $station->id)->orderBy('created_at', 'DESC')->first();
+        $data = Data::where('station_id', $station->id)->orderBy('created_at', 'DESC')->get();
 
         return response()->json(compact('data'),201);
     }

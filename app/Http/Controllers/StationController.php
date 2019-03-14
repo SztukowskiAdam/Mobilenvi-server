@@ -7,6 +7,7 @@ use App\Services\DataService;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTFactory;
@@ -79,5 +80,19 @@ class StationController extends Controller
         }
 
         return response()->json([$this->dataService->makeData($request, $station->id)], 200);
+    }
+
+    public function getCurrentData() {
+
+
+            $data = Data::join(DB::raw('(SELECT station_id, MAX(created_at) created_at FROM data GROUP BY station_id) b'), function ($join) {
+                $join->on('b.station_id', '=', 'data.station_id')->on('data.created_at', '=', 'b.created_at');
+            })->join('stations as c', 'c.id', '=', 'data.station_id')
+                ->select('data.station_id', 'data.temperature as temperature', 'data.pressure as pressure', 'c.position_x as latitude', 'c.position_y as longitude', 'c.name')
+                ->get();
+
+
+
+        return response()->json(compact('data'), 200);
     }
 }
