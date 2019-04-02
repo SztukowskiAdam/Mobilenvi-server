@@ -1,23 +1,39 @@
 <?php
 namespace App\Services;
 
-use App\Models\Data;
+use App\Repositories\DataRepository;
 use Illuminate\Http\Request;
 
 class  DataService {
 
-    private $data;
+    private $dataRepository;
 
-    public function __construct(Data $data)
+    /**
+     * DataService constructor.
+     * @param DataRepository $dataRepository
+     */
+    public function __construct(DataRepository $dataRepository)
     {
-        $this->data = $data;
+        $this->dataRepository = $dataRepository;
     }
 
+    /**
+     * @param Request $request
+     * @param $stationId
+     * @return bool
+     */
     public function makeData(Request $request, $stationId) {
-        $this->data->station_id = $stationId;
-        $this->data->temperature = $request->temperature;
-        $this->data->pressure = $request->pressure;
+        return $this->dataRepository->makeData($request, $stationId);
+    }
 
-        return $this->data->save();
+    /**
+     * @return mixed
+     */
+    public function getCurrentData() {
+        return $this->dataRepository->getCurrentData();
+    }
+
+    public function getDataFromStation(int $stationId) {
+        return $this->dataRepository->getDataFromStation($stationId);
     }
 }

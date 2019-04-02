@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Data;
 use App\Models\Station;
+use App\Services\DataService;
+use App\Services\StationService;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
@@ -14,15 +16,29 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class UserController extends Controller
 {
-    public function __construct()
+    private $dataService, $stationService;
+
+    /**
+     * UserController constructor.
+     * @param DataService $dataService
+     * @param StationService $stationService
+     */
+    public function __construct(DataService $dataService, StationService $stationService)
     {
         Config::set('jwt.user', User::class);
         Config::set('auth.providers', ['users' => [
             'driver' => 'eloquent',
             'model' => User::class,
         ]]);
+
+        $this->dataService = $dataService;
+        $this->stationService = $stationService;
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function authenticate(Request $request)
     {
         $credentials = $request->only('email', 'password');
@@ -38,6 +54,10 @@ class UserController extends Controller
         return response()->json(compact('token'));
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -61,6 +81,9 @@ class UserController extends Controller
         return response()->json(compact('user','token'),201);
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getAuthenticatedUser()
     {
         try {
@@ -87,6 +110,10 @@ class UserController extends Controller
         return response()->json(compact('user'));
     }
 
+    /**
+     * @param Request $request
+     * @return bool|\Illuminate\Http\JsonResponse
+     */
     public function userLocationData(Request $request) {
         try {
             if (! $user = JWTAuth::parseToken()->authenticate()) {
@@ -107,11 +134,10 @@ class UserController extends Controller
 
         }
 
-        $station = Station::orderByRaw('ABS(position_x - '.$request->x.') + ABS(position_y - '.$request->y.')')->first();
-
+        $station = $this->stationService->getNearestStation($request->x, $request->y);
         if(empty($station)) return false;
 
-        $data = Data::where('station_id', $station->id)->orderBy('created_at', 'DESC')->get();
+        $data = $this->dataService->getDataFromStation($station->id);
 
         return response()->json(compact('data'),201);
     }
